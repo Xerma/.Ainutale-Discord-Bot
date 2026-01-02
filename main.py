@@ -7,29 +7,39 @@ from utils import *
 import json
 import os
 
-intents = discord.Intents.default()
-intents.message_content = True
+class AinutaleBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.all()
+        self._synced = False
 
-with open("config.json", "r") as config:
-    config_data = json.load(config)
-    token = config_data["DISCORD_TOKEN"]
-    prefix = config_data["PREFIX"]
+        with open("config.json", "r") as config:
+            config_data = json.load(config)
 
-client = commands.Bot(prefix, intents = intents)
+        super().__init__(command_prefix=config_data["PREFIX"], intents=intents)
+        self.config = config_data
+        self.config["LOGS_CHANNEL_ID"] = int(self.config["LOGS_CHANNEL_ID"])
 
-if __name__ == '__main__':
-    for filename in os.listdir("cogs"):
-        try:
-            if (filename.endswith(".py")):
-                client.load_extension(f"cogs.{filename[: -3]}")
-                print(f"Cog [{filename}] loaded")
-        except Exception as e:
-            print(f"Failed to load extension {filename}: {e}")
+    async def setup_hook(self):
+        for filename in os.listdir("./cogs"):
+            try:
+                if (filename.endswith(".py")):
+                    await self.load_extension(f"cogs.{filename[: -3]}")
+            except Exception as e:
+                print(f"Failed to load extension {filename}: {e}")
 
-@client.event
-async def on_ready():
-    print(f"Logged in as {client.user}")
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name =f"{client.command_prefix}help"))
-    print(f"Discord.py version: {discord.__version__}")
+    async def on_ready(self):
+        if not self._synced:
+            await self.tree.sync(guild=self.get_guild(877360002141159425)) #remove guild arg for global sync
+            self._synced = True
+            print("Slash commands loaded")
 
-client.run(token)
+        print(f"Logged in as {self.user}")
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name =f"{self.command_prefix}help"))
+        print(f"Discord.py version: {discord.__version__}")
+    
+def main():
+    bot = AinutaleBot()
+    bot.run(bot.config["TOKEN"])
+
+if __name__ == "__main__":
+    main()
