@@ -23,6 +23,7 @@ class Core(commands.Cog):
     async def reload(self, interaction: discord.Interaction, cog: str) -> None:
         await cog_service.unload(self.bot, cog)
         await cog_service.load(self.bot, cog)
+        print(f"Reloaded {cog}")
         await interaction.response.send_message(f"Reloaded {cog}")
 
 async def setup(bot: commands.Bot):
