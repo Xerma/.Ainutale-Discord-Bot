@@ -14,6 +14,17 @@ class Logs(commands.Cog):
         self.logs_channel = self.bot.get_channel(self.log_ID)
         print(f"{os.path.basename(__file__)} loaded")
 
+    # FIX BEFORE + AFTER FIELDS CAN'T BE MORE THAN 1024 - trim code
+    
+    # def clamp_field(text: str, limit: int = 1024) -> str:
+    #   if not text:
+    #       return "*[empty]*"
+    # Discord embed field values must be <= 1024
+    #   if len(text) <= limit:
+    #       return text
+    # leave room for ellipsis
+    #   return text[: limit - 3] + "..."
+
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         embed = discord.Embed(title="DELETE", description=f"**{message.author.name} deleted a message in {message.channel.mention}**", color=0xFF0000)
